@@ -28,28 +28,27 @@ pipeline {
             }
         }
 
-        stage('Plan: All Layers') {
+        // ─── 0-bootstrap must apply FIRST ─────────────────────────────────────
+        // S3 bucket + DynamoDB lock table must exist before 1-network and 2-eks
+        // can init their backends or acquire state locks
+
+        stage('Bootstrap: Plan') {
             steps {
                 sh 'cd terraform/0-bootstrap && terraform init -input=false && terraform plan -out tfplan && terraform show -no-color tfplan > tfplan.txt'
-                sh 'cd terraform/1-network && terraform init -input=false && terraform plan -out tfplan && terraform show -no-color tfplan > tfplan.txt'
-                sh 'cd terraform/2-eks && terraform init -input=false && terraform plan -out tfplan && terraform show -no-color tfplan > tfplan.txt'
             }
         }
 
-        stage('Approval') {
+        stage('Bootstrap: Approval') {
             steps {
                 script {
-                    def bootstrap = readFile 'terraform/0-bootstrap/tfplan.txt'
-                    def network   = readFile 'terraform/1-network/tfplan.txt'
-                    def eks       = readFile 'terraform/2-eks/tfplan.txt'
-                    def allPlans  = "=== 0-bootstrap ===\n${bootstrap}\n=== 1-network ===\n${network}\n=== 2-eks ===\n${eks}"
-                    input message: 'Review all layer plans and approve to proceed',
-                          parameters: [text(name: 'Plan', description: 'Terraform Plan Output', defaultValue: allPlans)]
+                    def plan = readFile 'terraform/0-bootstrap/tfplan.txt'
+                    input message: '[0-bootstrap] Review plan and approve to create S3 + DynamoDB',
+                          parameters: [text(name: 'Plan', description: 'Terraform Plan Output', defaultValue: plan)]
                 }
             }
         }
 
-        stage('Execute: 0-bootstrap') {
+        stage('Bootstrap: Execute') {
             steps {
                 script {
                     if (params.terraformAction == 'apply') {
@@ -61,27 +60,68 @@ pipeline {
             }
         }
 
-        stage('Execute: 1-network') {
+        // ─── 1-network + 2-eks plan together after bootstrap is ready ──────────
+
+        stage('Plan: 1-network + 2-eks') {
+            when {
+                expression { params.terraformAction == 'apply' }
+            }
+            steps {
+                sh 'cd terraform/1-network && terraform init -input=false && terraform plan -out tfplan && terraform show -no-color tfplan > tfplan.txt'
+                sh 'cd terraform/2-eks && terraform init -input=false && terraform plan -out tfplan && terraform show -no-color tfplan > tfplan.txt'
+            }
+        }
+
+        stage('Approval: 1-network + 2-eks') {
+            when {
+                expression { params.terraformAction == 'apply' }
+            }
             steps {
                 script {
-                    if (params.terraformAction == 'apply') {
-                        sh 'cd terraform/1-network && terraform apply -input=false tfplan'
-                    } else {
-                        sh 'cd terraform/1-network && terraform destroy -auto-approve'
-                    }
+                    def network = readFile 'terraform/1-network/tfplan.txt'
+                    def eks     = readFile 'terraform/2-eks/tfplan.txt'
+                    def allPlans = "=== 1-network ===\n${network}\n=== 2-eks ===\n${eks}"
+                    input message: 'Review 1-network + 2-eks plans and approve to proceed',
+                          parameters: [text(name: 'Plan', description: 'Terraform Plan Output', defaultValue: allPlans)]
                 }
             }
         }
 
-        stage('Execute: 2-eks') {
+        stage('Execute: 1-network') {
+            when {
+                expression { params.terraformAction == 'apply' }
+            }
             steps {
-                script {
-                    if (params.terraformAction == 'apply') {
-                        sh 'cd terraform/2-eks && terraform apply -input=false tfplan'
-                    } else {
-                        sh 'cd terraform/2-eks && terraform destroy -auto-approve'
-                    }
-                }
+                sh 'cd terraform/1-network && terraform apply -input=false tfplan'
+            }
+        }
+
+        stage('Execute: 2-eks') {
+            when {
+                expression { params.terraformAction == 'apply' }
+            }
+            steps {
+                sh 'cd terraform/2-eks && terraform apply -input=false tfplan'
+            }
+        }
+
+        // ─── Destroy runs in reverse order ────────────────────────────────────
+
+        stage('Destroy: 2-eks') {
+            when {
+                expression { params.terraformAction == 'destroy' }
+            }
+            steps {
+                sh 'cd terraform/2-eks && terraform init -input=false && terraform destroy -auto-approve'
+            }
+        }
+
+        stage('Destroy: 1-network') {
+            when {
+                expression { params.terraformAction == 'destroy' }
+            }
+            steps {
+                sh 'cd terraform/1-network && terraform init -input=false && terraform destroy -auto-approve'
             }
         }
 

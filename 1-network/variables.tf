@@ -1,6 +1,6 @@
 variable "project" {
   type    = string
-  default = "itkannadigaru"
+  default = "quantamvector"
 }
 
 variable "vpc_cidr" {

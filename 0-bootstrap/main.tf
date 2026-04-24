@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "laxmanraju-state-lock"
+  bucket = "laxmanraju-state-1-lock"
 }
 
 resource "aws_s3_bucket_versioning" "tf_state" {
@@ -30,7 +30,7 @@ resource "aws_s3_bucket_public_access_block" "tf_state" {
 }
 
 resource "aws_dynamodb_table" "tf_lock" {
-  name         = "laxmanraju-statefile-backup"
+  name         = "laxmanraju-state-2-lock"
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "LockID"
 

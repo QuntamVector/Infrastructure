@@ -88,10 +88,18 @@ pipeline {
             }
         }
 
+        // stage('Plan: 2-eks') {
+        //     when { expression { params.terraformAction == 'apply' } }
+        //     steps {
+        //         sh 'cd terraform/2-eks && terraform init -input=false'
+        //         sh 'cd terraform/2-eks && terraform plan -out tfplan'
+        //         sh 'cd terraform/2-eks && terraform show -no-color tfplan > tfplan.txt'
+        //     }
+        // }
         stage('Plan: 2-eks') {
             when { expression { params.terraformAction == 'apply' } }
             steps {
-                sh 'cd terraform/2-eks && terraform init -input=false'
+                sh 'cd terraform/2-eks && terraform init -reconfigure -input=false'
                 sh 'cd terraform/2-eks && terraform plan -out tfplan'
                 sh 'cd terraform/2-eks && terraform show -no-color tfplan > tfplan.txt'
             }

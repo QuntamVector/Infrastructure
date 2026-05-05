@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "laxmanraju-state-1-lock"
+  bucket = "laxmanraju-state-lock"
 }
 
 resource "aws_s3_bucket_versioning" "tf_state" {

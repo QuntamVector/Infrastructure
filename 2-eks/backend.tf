@@ -3,7 +3,7 @@ terraform {
     bucket         = "laxmanraju-state-1-lock"
     key            = "laxmanraju/2-eks/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "laxmanraju-state-2-lock"
+    dynamodb_table = "laxmanraju-state-1-lock"
     encrypt        = true
   }
 }

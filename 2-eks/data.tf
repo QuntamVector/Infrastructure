@@ -3,7 +3,7 @@ data "terraform_remote_state" "network" {
 
   config = {
     bucket = "laxmanraju-statefile-logs"
-    key    = "laxmanraju/1-network/terraform.tfstate"
+    key    = "env/terraform.tfstate"
     region = "us-east-1"
   }
 }

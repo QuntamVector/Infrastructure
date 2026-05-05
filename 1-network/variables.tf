@@ -1,6 +1,6 @@
 variable "project" {
   type    = string
-  default = "quantamvector"
+  default = "microservices"
 }
 
 variable "vpc_cidr" {
@@ -10,5 +10,5 @@ variable "vpc_cidr" {
 
 variable "azs" {
   type    = list(string)
-  default = ["ap-northeast-1a", "ap-northeast-1c", "ap-northeast-1d"]
+  default = ["us-east-1a", "us-east-1b"]
 }

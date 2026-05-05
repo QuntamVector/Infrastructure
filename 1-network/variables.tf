@@ -1,6 +1,6 @@
 variable "project" {
   type    = string
-  default = "microservices"
+  default = "microservices-v2"
 }
 
 variable "vpc_cidr" {

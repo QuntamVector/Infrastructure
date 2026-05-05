@@ -10,7 +10,7 @@
 
 terraform {
   backend "s3" {
-    bucket        = "laxmanraju-state-lock"   # your S3 bucket
+    bucket        = "laxmanraju-statefile-logs"   # your S3 bucket
     key           = "env/terraform.tfstate"   # path inside the bucket
     region        = "us-east-1"
     encrypt       = true

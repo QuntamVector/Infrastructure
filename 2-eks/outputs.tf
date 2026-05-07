@@ -11,5 +11,5 @@ output "cluster_certificate_authority_data" {
 }
 
 output "region" {
-  value = "ap-northeast-1"
+  value = "us-east-1"
 }

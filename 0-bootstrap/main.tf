@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "tf_state" {
-  bucket = "quantamvector-infra-statefile-backup-1"
+  bucket = "quantamvector-infra-statefile-backup-2"
 }
 
 resource "aws_s3_bucket_versioning" "tf_state" {

@@ -5,11 +5,11 @@ variable "project" {
 
 variable "kubernetes_version" {
   type    = string
-  default = "1.30"
+  default = "1.34"
 }
 
 variable "ssh_key_name" {
   type        = string
   description = "Name of the EC2 key pair for SSH access to worker nodes"
-  default     = "chethan-key"
+  default     = "advance-devops-course"
 }
